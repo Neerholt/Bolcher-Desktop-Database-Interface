@@ -1,0 +1,11 @@
+CREATE TABLE [dbo].[bolchertabel] (
+    [BolcherID]   INT            IDENTITY (1, 1) NOT NULL,
+    [BolcheNavn]  NVARCHAR (250) NULL,
+    [BolcheFave]  NVARCHAR (250) NULL,
+    [BolcheVægt]  NVARCHAR (50)  NULL,
+    [SmagsSurhed] NVARCHAR (50)  NULL,
+    [SmagsStyrke] NVARCHAR (250) NULL,
+    [SmagsType]   NVARCHAR (250) NULL,
+    [Råvarepris]  NVARCHAR (60)  NULL,
+    PRIMARY KEY CLUSTERED ([BolcherID] ASC)
+);
