@@ -1,0 +1,14 @@
+1.[✓] |Udskriv alle informationer om alle bolcher.                                                                                                  
+2.[✓] |Vis/udskriv navnene på alle de røde bolcher.           
+3.[✓] |Vis/udskriv navnene på alle bolcher, hvor der i navnet findes mindst ét “e”. 
+4.[✓] |Udskriv alle informationer om et tilfældigt bolche, udvalgt af systemet. (via søgning)     
+----|                                                                                        
+1.[X] |Vis/udskriv navnene på alle de røde og de blå bolcher, i samme SQL udtræk.                                                                   
+2.[X] |Vis/udskriv navnene på alle bolcher, der ikke er røde, sorteret alfabetisk.                                                                   
+3.[X] |Vis/udskriv navnene på alle bolcher som starter med et “B”.                                                                                                                                                 
+4.[x] |Vis/udskriv navn og vægt på alle bolcher der vejer mindre end 10 gram, sorter dem efter vægt, stigende.                                       
+5.[x] |Vis/udskriv navnene på alle bolcher, der vejer mellem 10 og 12 gram (begge tal inklusive), sorteret alfabetisk og derefter vægt.                 
+6.[x] |Vælg de tre største (tungeste) bolcher.                                                                                                                                                                                                           
+
+
+Lave hele update funktionen hvis der er tid til det  
