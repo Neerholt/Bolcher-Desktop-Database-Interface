@@ -1,0 +1,302 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace DesktopBolcherDatabase
+{
+    public partial class MainForm : Form
+    {
+
+        SqlConnection conn = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\vict3459\source\repos\DesktopBolcherDatabase\DesktopBolcherDatabase\database.mdf;Integrated Security=True");
+
+
+        public MainForm()
+        {
+            InitializeComponent();
+        }
+
+       
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+          
+            displayData();
+        }
+
+        //indset data ind i databasen 
+        private void Indset_Click(object sender, EventArgs e)
+        {
+
+            if(txtnavn.Text == "" || txtfave.Text == "" || txtvagt.Text == "" || txtsurhed.Text == "" || txtstyrke.Text == "" || txttype.Text == "" || txtpris.Text == "")
+            {
+                MessageBox.Show("Du glemt at skrive noget i et af felterne", "Fejl", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                conn.Open();
+                SqlCommand cmd = conn.CreateCommand();
+                cmd.CommandType = CommandType.Text;
+                cmd.CommandText = "INSERT INTO bolchertabel VALUES('" + txtnavn.Text + "','" + txtfave.Text + "','" + txtvagt.Text + "','" + txtsurhed.Text + "','" + txtstyrke.Text + "','" + txttype.Text + "','" + txtpris.Text + "')";
+                cmd.ExecuteNonQuery();
+                conn.Close();
+                txtnavn.Text = ""; txtfave.Text = ""; txtvagt.Text = ""; txtsurhed.Text = ""; txtstyrke.Text = ""; txttype.Text = ""; txtpris.Text = "";
+                displayData();
+                //MessageBox.Show("Tilføjet et nyt bolche til databasen");
+            }
+
+        }
+
+
+        //Slet data fra databasen 
+        private void Slet_Click(object sender, EventArgs e)
+        {
+
+
+            if(txtslet.Text == "")
+            {
+                MessageBox.Show("Du glemt at skrive noget i feltet", "Fejl", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+
+                DialogResult dialogResult = MessageBox.Show($"Du er ved at slette row { txtslet.Text } i tablen. Vil du det?", $"Slet row {txtslet.Text} ?", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    conn.Open();
+                    SqlCommand cmd = conn.CreateCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = "delete from bolchertabel where BolcherID='" + txtslet.Text + "'";
+                    cmd.ExecuteNonQuery();
+                    conn.Close();
+                    txtslet.Text = "";
+                    displayData();
+                    MessageBox.Show("Table er blevet slettet", "Action godkendt", MessageBoxButtons.OK, MessageBoxIcon.Question);
+
+                }
+                else if (dialogResult == DialogResult.No)
+                {
+                    MessageBox.Show("Fejl kunne ikke slet kolonnen!", "Fejl!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    txtslet.Text = "";
+                }
+
+            }
+
+
+           
+        }
+
+
+        //Updater table. Virker ikke 
+        private void Update_Click(object sender, EventArgs e)
+        {
+
+            if(txtupdatenavn.Text == "" || kolonnenavn.Text == "" || txtIDupdate.Text == "")
+            {
+                MessageBox.Show("Du glemt at skrive noget i feltet", "Fejl", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+
+                DialogResult dialogResult = MessageBox.Show("Vil du updater tablen?", "Updater table?", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    conn.Open();
+                    SqlCommand cmd = conn.CreateCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = "update bolchertabel set BolcheNavn='" + txtupdatenavn.Text + "' where BolcherID='" + txtIDupdate.Text + "'";
+                    cmd.ExecuteNonQuery();
+                    conn.Close();
+                    txtupdatenavn.Text = ""; kolonnenavn.Text = ""; txtIDupdate.Text = "";
+                    //nynavn.Text = "";
+                    displayData();
+                    MessageBox.Show("Table er blevet updateret", "Action godkendt", MessageBoxButtons.OK);
+
+                    /*Husk at slette "txtnavn.TEXT og får lavet de sådan som der brurde laves, det her et kun en milertidei fiks*/
+                }
+                else if (dialogResult == DialogResult.No)
+                {
+                    MessageBox.Show("Fejl kunne ikke updater table data!", "Fejl!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    txtupdatenavn.Text = ""; kolonnenavn.Text = ""; txtIDupdate.Text = "";
+                }
+            }
+        }
+
+
+
+        //Søg i databasen 
+        private void Søg_Click(object sender, EventArgs e)
+        {
+
+            SqlCommand cmd = conn.CreateCommand();
+            DataTable dt = new DataTable();
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            DataView dv = dt.DefaultView;
+            conn.Open();
+            cmd.CommandType = CommandType.Text;
+            cmd.CommandText = "select * from bolchertabel";
+            cmd.ExecuteNonQuery();
+            da.Fill(dt);
+
+            //Gør data tablen stor igen hvis man under en søgningen havde valgt at gør desktop appen lille 
+            dataGridView1.Show();
+      
+            if (checktil.Checked)
+            { 
+                if (radionavn.Checked)
+                {
+                    dv.RowFilter = string.Format("bolchenavn like '{0}*'", sognavn.Text);
+                    dataGridView1.DataSource = dv.ToTable();
+                    sognavn.Text = "";
+                    conn.Close();
+                }
+                else if (radiofave.Checked)
+                {
+                    dv.RowFilter = string.Format("bolchefave like '{0}*'", sognavn.Text);
+                    dataGridView1.DataSource = dv.ToTable();
+                    sognavn.Text = "";
+                    conn.Close();
+                }
+                else if (radiovagt.Checked)
+                {
+                    da.Fill(dt);
+                    dv.RowFilter = string.Format("bolchevægt like '{0}*'", sognavn.Text);
+                    dataGridView1.DataSource = dv.ToTable();
+                    sognavn.Text = "";
+                    conn.Close();
+                }
+                else if (radiopris.Checked)
+                {
+                    da.Fill(dt);
+                    dv.RowFilter = string.Format("Råvarepris like '{0}*'", sognavn.Text);
+                    dataGridView1.DataSource = dv.ToTable();
+                    sognavn.Text = "";
+                    conn.Close();
+                }
+            }
+            else
+            {
+
+                if (radionavn.Checked)
+                {
+                    dv.RowFilter = string.Format("bolchenavn like '%{0}%'", sognavn.Text);
+                    dataGridView1.DataSource = dv.ToTable();
+                    sognavn.Text = "";
+                    conn.Close();
+                }
+                else if (radiofave.Checked)
+                {
+                    dv.RowFilter = string.Format("bolchefave like '%{0}%'", sognavn.Text);
+                    dataGridView1.DataSource = dv.ToTable();
+                    sognavn.Text = "";
+                    conn.Close();
+                }
+                else if (radiovagt.Checked)
+                {
+                    da.Fill(dt);
+                    dv.RowFilter = string.Format("bolchevægt like '%{0}%'", sognavn.Text);
+                    dataGridView1.DataSource = dv.ToTable();
+                    sognavn.Text = "";
+                    conn.Close();
+                }
+                else if (radiopris.Checked)
+                {
+                    da.Fill(dt);
+                    dv.RowFilter = string.Format("Råvarepris like '%{0}%'", sognavn.Text);
+                    dataGridView1.DataSource = dv.ToTable();
+                    sognavn.Text = "";
+                    conn.Close();
+                }
+            }
+        }
+
+
+        //Display data til datagrid 
+        public void displayData()
+        {
+            conn.Open();
+            SqlCommand cmd = conn.CreateCommand();
+            cmd.CommandType = CommandType.Text;
+            cmd.CommandText = "select * from bolchertabel";
+            cmd.ExecuteNonQuery();
+            DataTable dt = new DataTable();
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            da.Fill(dt);
+            dataGridView1.DataSource = dt;
+            conn.Close();
+
+        }
+
+
+        //Displayer data
+        private void Display_Click(object sender, EventArgs e)
+        {
+            displayData();
+        }
+
+
+        //Lukker programmet 
+        private void Lukke_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show("Vil du afslute programmet?", "Luk programmet?", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
+            if (dialogResult == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
+            else if (dialogResult == DialogResult.No)
+            {
+                //Do nothing
+            }
+          
+        }
+
+
+        //Gemmer datagrid gør desktop appen mindere 
+        private void Hidegrid_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Hide(); 
+           
+        }
+
+        //Viser datagrid igen, går desktop appen størrere 
+        private void Showgrid_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Show();
+        }
+
+
+
+        //Alle knapper der er sat til at kunne nulstile.
+
+        //Nulstiler textfelterne i updater 
+        private void Button1_Click(object sender, EventArgs e)
+        {
+            txtIDupdate.Clear(); kolonnenavn.Clear(); txtupdatenavn.Clear();
+        }
+
+        //Nulstil slet textfelt
+        private void Clearslet_Click(object sender, EventArgs e)
+        {
+            txtslet.Clear();
+        }
+
+        //Nulstil indset til database textfelt
+        private void Clear_Click(object sender, EventArgs e)
+        {
+            txtnavn.Clear(); txtfave.Clear(); txtvagt.Clear(); txtsurhed.Clear(); txtstyrke.Clear(); txttype.Clear(); txtpris.Clear();
+        }
+
+        //Nulstiler søgerfeltet 
+        private void Sognulstil_Click(object sender, EventArgs e)
+        {
+            sognavn.Clear();
+        }
+
+
+    }
+}
